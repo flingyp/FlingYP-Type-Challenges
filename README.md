@@ -6,6 +6,8 @@
 
 > TypeScript 类型体操：https://github.com/type-challenges/type-challenges
 
+> 如果 GitHub 访问过慢，可以访问 Gitee 仓库：https://gitee.com/mirrors_trending/type-challenges/tree/main
+
 ## 做题收获总结：
 
 ### `extends` 关键字
@@ -84,3 +86,31 @@ type TupleToObject<T extends readonly any[]> = {
   [key in T[number]]: key;
 };
 ```
+
+### 在 TS 中如果类型是一个数组，获取数组类型长度的方式？
+
+> 参考 00018-easy-tuple-length
+
+```typescript
+type Length<T extends readonly any[]> = T["length"];
+```
+
+### Exclude 工具类型
+
+> Exclude<UnionType, ExcludedMembers> 从 UnionType 排除 ExcludedMembers 所定义的类型 从而返回一个新的类型
+
+```typescript
+type T2 = Exclude<string | number | (() => void), Function>; => type T2 = string | number
+```
+
+### 联合类型的遍历
+
+> 参考 00043-easy-exclude。 联合类型的遍历： T extends U ? Type1 : Type2 （想象成联合类型的每一个类型都会进一遍这个三元表达式，因此来进行判断）
+
+```typescript
+type MyExclude<T, U> = T extends U ? never : T;
+```
+
+### `Awaited<T>` 工具类型
+
+> `Awaited<T>` 是 TS 4.5 新添加的内置工具类型。 可以帮助我们返回 Promise 对象里的类型。https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html
