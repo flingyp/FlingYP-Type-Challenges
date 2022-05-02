@@ -114,3 +114,75 @@ type MyExclude<T, U> = T extends U ? never : T;
 ### `Awaited<T>` 工具类型
 
 > `Awaited<T>` 是 TS 4.5 新添加的内置工具类型。 可以帮助我们返回 Promise 对象里的类型。https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html
+
+### 关于 00189-easy-awaited 第二种方法的理解
+
+> 关键在于 Infer 关键字的使用，Infer 只能用于条件类型 extends
+> [Infer 关键字](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html#type-inference-in-conditional-types)
+
+```typescript
+/**
+ * 假如我们有一个 Promise 对象，这个 Promise 对象会返回一个类型。在 TS 中，我们用 Promise 中的 T 来描述这个 Promise 返回的类型。请你实现一个类型，可以获取这个类型。
+ * 比如：Promise<ExampleType>，请你返回 ExampleType 类型。
+ */
+
+// 第一种答案
+// type MyAwaited<T extends Promise<unknown>> = Awaited<T>;
+
+// 第二种答案
+type MyAwaited<T extends Promise<unknown>> = T extends Promise<infer X>
+  ? X extends Promise<unknown>
+    ? MyAwaited<X>
+    : X
+  : never;
+
+// 1. Awaited<> 是 TS 4.5 新添加的内置工具类型。 可以帮助我们返回Promise对象里的类型
+// https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html
+
+// 2. Infer 关键字的理解使用
+
+/**
+ * 对于第二种答案的理解：要理解Infer关键字的作用 和 递归
+ *  1. 我们传给 MyAwaited<T> 的 T 泛型限制了 必须是 Promise 的类型，这样就解决了  type error = MyAwaited<number>; 的爆红问题
+ *  2. 在根据 T 限制了必须是 Promise 类型，所以这段代码 T extends Promise<infer X> ? Type1 : Type2  是一定会走 Type1的，因此 Type2 写什么类型都无所谓
+ *  3. 进入到 Type1 后，先要理解下 Infer 关键字 在 条件类型 extends 的作用， Infer 是推断的意思，意思就是 假设 Promise<T> 里的泛型的类型 是 X 类型
+ *  4. 然后问  X 类型 它是不是也是 Promise 类型 如果是 则进入 MyAwaited<X> 进行递归操作
+ *  5. 如果不是Promise类型，则返回这个 X 类型
+ */
+```
+
+### 关于 00898-easy-includes 答案的理解
+
+```typescript
+/**
+ * 在类型系统里实现 JavaScript 的 Array.includes 方法，这个类型接受两个参数，
+ * 返回的类型要么是 true 要么是 false。
+ */
+
+import { Equal } from "@type-challenges/utils";
+
+// type Includes<T extends readonly any[], U> = any;  //（没做出来）
+
+// 答案：
+type Includes<T extends readonly any[], U> = T extends [
+  infer First,
+  ...infer Rest
+]
+  ? Equal<U, First> extends true
+    ? true
+    : Includes<Rest, U>
+  : false;
+
+// Infer 关键字的理解和使用
+
+// @type-challenges/utils 类型工具的 Equal 类型工具
+
+/**
+ * 这道题没有做做出来，关键是没有想过 infer 可以这么写，也没有想到 使用了 Equal，所以对数组类型的遍历 没有思路
+ * 1. 和 00189-easy-awaited 的第二种解发思路一样，使用 Infer 和 递归
+ * 2. 首先传入的 泛型 T 在经过类型约束： T extends readonly any[]  后，一定不会走到 false的
+ * 3. T extends [infer First,...infer Rest] 在这里假设了 T泛型，中的第一个元素的类型是 First 可以看做数学里的（未知数X），其他的类型是 Rest 可以看做数学里的（未知数Y）
+ * 4. 然后判断 第一个元素类型First 和 第二个泛型参数的类型是否一致，这里就使用到了Equal： Equal<U, First> extends true。 如果是则直接返回true，就没必要进行后面的递归操作了
+ * 5. 如果第一个元素类型参数不一致，就进行递归操作。 其实就是在拿泛型U和泛型T的第一个元素的类型做比较。
+ */
+```
