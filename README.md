@@ -234,3 +234,81 @@ type DeepReadonly<T> = {
 
 // Record<K，T> 关键字的使用： 构造一个对象类型，其属性键为 Keys，其属性值为 Type
 ```
+
+### 00106-medium-trimleft、 00108-medium-trim
+
+针对于字符串前后空格的处理
+
+```typescript
+/**
+ * 实现 TrimLeft<T> ，它接收确定的字符串类型并返回一个新的字符串，
+ * 其中新返回的字符串删除了原字符串开头的空白字符串。
+ */
+type delStr = " " | "\n" | "\t";
+
+type TrimLeft<S extends string> = S extends `${delStr}${infer X}`
+  ? TrimLeft<X>
+  : S;
+```
+
+```typescript
+/**
+ * 实现Trim<T>，它是一个字符串类型，并返回一个新字符串，其中两端的空白符都已被删除
+ */
+
+type delAllTrimStr = " " | "\n" | "\t";
+
+type Trim<S extends string> = S extends
+  | `${delAllTrimStr}${infer X}`
+  | `${delAllTrimStr}${infer X}${delAllTrimStr}`
+  | `${infer X}${delAllTrimStr}`
+  ? Trim<X>
+  : S;
+
+type Test = Trim<" str">;
+```
+
+### 00110-medium-capitalize
+
+处理字符串首字母改为大写
+
+```typescript
+/**
+ * 实现 Capitalize<T> 它将字符串的第一个字母转换为大写，其余字母保持原样
+ */
+
+interface LowercaseLetter {
+  a: "A";
+  b: "B";
+  c: "C";
+  d: "D";
+  e: "E";
+  f: "F";
+  g: "G";
+  h: "H";
+  i: "I";
+  j: "J";
+  k: "K";
+  l: "L";
+  m: "M";
+  n: "N";
+  o: "O";
+  p: "P";
+  q: "Q";
+  r: "R";
+  s: "S";
+  t: "T";
+  u: "U";
+  v: "V";
+  w: "W";
+  x: "X";
+  y: "Y";
+  z: "Z";
+}
+
+type MyCapitalize<S extends string> = S extends `${infer F}${infer X}`
+  ? F extends keyof LowercaseLetter
+    ? `${LowercaseLetter[F]}${X}`
+    : S
+  : "";
+```
