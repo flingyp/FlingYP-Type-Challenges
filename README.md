@@ -312,3 +312,39 @@ type MyCapitalize<S extends string> = S extends `${infer F}${infer X}`
     : S
   : "";
 ```
+
+### 00116-medium-replace、00119-medium-replaceall
+
+字符串替换
+
+```typescript
+/**
+ * 实现 Replace<S, From, To> 将字符串 S 中的第一个子字符串 From 替换为 To
+ */
+
+type Replace<
+  S extends string,
+  From extends string,
+  To extends string
+> = S extends `${infer Left}${From}${infer Right}`
+  ? From extends ""
+    ? S
+    : `${Left}${To}${Right}`
+  : S;
+```
+
+```typescript
+/**
+ * 实现 ReplaceAll<S, From, To> 将一个字符串 S 中的所有子字符串 From 替换为 To
+ */
+
+type ReplaceAll<
+  S extends string,
+  From extends string,
+  To extends string
+> = From extends ""
+  ? S
+  : S extends `${infer O}${From}${infer P}`
+  ? `${O}${To}${ReplaceAll<P, From, To>}`
+  : S;
+```
